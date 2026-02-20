@@ -1,0 +1,52 @@
+[
+  {
+    "id": "eval-0",
+    "description": "Full status check with mocked providers",
+    "prompt": "Check all my API provider balances and limits and give me a full report.",
+    "expectations": [
+      "Report includes a summary section with provider counts",
+      "Each configured provider shows status (OK/WARNING/ERROR)",
+      "Unconfigured providers are listed as unconfigured",
+      "Report includes balance information where available",
+      "Report includes rate limit information where available",
+      "Low balances are flagged with warnings",
+      "Errors (bad API keys) are clearly reported",
+      "Recommendations section appears if there are warnings or errors",
+      "Report is formatted cleanly and is easy to scan"
+    ]
+  },
+  {
+    "id": "eval-1",
+    "description": "Single provider check",
+    "prompt": "Just check my Anthropic and OpenAI API status.",
+    "expectations": [
+      "Only Anthropic and OpenAI are checked",
+      "Other providers are not mentioned or are skipped",
+      "Rate limit info from headers is displayed for Anthropic",
+      "OpenAI balance or billing info is shown if available"
+    ]
+  },
+  {
+    "id": "eval-2",
+    "description": "JSON output request",
+    "prompt": "Run the API status check and give me the raw JSON output.",
+    "expectations": [
+      "Output is valid JSON",
+      "JSON contains an array of provider result objects",
+      "Each result has status, provider, and checked_at fields",
+      "Limits and balance fields are present (may be null)"
+    ]
+  },
+  {
+    "id": "eval-3",
+    "description": "No keys configured",
+    "prompt": "Check my API status",
+    "notes": "Run with no environment variables set",
+    "expectations": [
+      "All providers shown as UNCONFIGURED",
+      "Clear message explaining how to configure API keys",
+      "No errors or crashes",
+      "Instructions point to environment variable names"
+    ]
+  }
+]

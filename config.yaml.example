@@ -1,0 +1,59 @@
+# OpenClaw API Status Skill Configuration
+# Place this at: ~/.openclaw/api-status.yaml
+
+api_status:
+  # ──────────────────────────────────────────
+  # Balance Warning Thresholds
+  # ──────────────────────────────────────────
+  
+  # Warn when any USD balance drops below this amount
+  warn_below_usd: 5.00
+
+  # Warn when usage exceeds this percentage of limit
+  warn_usage_pct: 80
+
+  # ──────────────────────────────────────────
+  # Provider Settings
+  # ──────────────────────────────────────────
+  
+  # Providers to skip even if API key is configured
+  # Useful for providers you don't actively use
+  skip_providers: []
+  # Example:
+  # skip_providers:
+  #   - huggingface
+  #   - cohere
+
+  # ──────────────────────────────────────────
+  # Report Storage
+  # ──────────────────────────────────────────
+  
+  # Automatically save reports after each check
+  save_reports: false
+  
+  # Directory to save reports (supports ~ for home)
+  save_path: "~/openclaw/reports/"
+
+  # ──────────────────────────────────────────
+  # Currency Conversion
+  # ──────────────────────────────────────────
+  
+  # Approximate CNY → USD rate for Deepseek and Moonshot display
+  # Update periodically for accuracy
+  cny_to_usd_rate: 0.138
+
+  # ──────────────────────────────────────────
+  # Request Settings
+  # ──────────────────────────────────────────
+  
+  # Timeout in seconds per provider API call
+  request_timeout_seconds: 10
+
+  # ──────────────────────────────────────────
+  # Scheduling (if using OpenClaw task scheduler)
+  # ──────────────────────────────────────────
+  
+  # schedule:
+  #   enabled: false
+  #   cron: "0 9 * * 1"   # Every Monday at 9am
+  #   notify: "chat"       # chat | file | both
