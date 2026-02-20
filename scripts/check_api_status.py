@@ -513,20 +513,33 @@ async def check_moonshot(key: str, client: httpx.AsyncClient, warn_usd: float) -
     result = make_result("moonshot", "Moonshot/Kimi")
     result["console_url"] = "https://platform.moonshot.cn"
     try:
+        # Try international endpoint first, fall back to China
         resp = await client.get(
-            "https://api.moonshot.cn/v1/users/me/balance",
+            "https://api.moonshot.ai/v1/users/me/balance",
             headers={"Authorization": f"Bearer {key}"},
             timeout=TIMEOUT,
         )
+        if resp.status_code == 401:
+            # Try China endpoint
+            resp = await client.get(
+                "https://api.moonshot.cn/v1/users/me/balance",
+                headers={"Authorization": f"Bearer {key}"},
+                timeout=TIMEOUT,
+            )
         if resp.status_code == 401:
             set_error(result, "401 Unauthorized — invalid API key")
             return result
         if resp.status_code == 200:
             data = resp.json()
             balance = data.get("data", {})
+            # Handle both international and China API response formats
             available = float(balance.get("available_balance", 0))
-            currency = balance.get("currency", "CNY")
-            usd_equiv = available * CNY_TO_USD if currency == "CNY" else available
+            currency = balance.get("currency")
+            # International API (api.moonshot.ai) returns USD, China API returns CNY
+            is_international = "moonshot.ai" in str(resp.url)
+            if currency is None:
+                currency = "USD" if is_international else "CNY"
+            usd_equiv = available if currency == "USD" else available * CNY_TO_USD
             result["balance"] = {
                 "amount": available,
                 "currency": currency,
