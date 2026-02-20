@@ -282,16 +282,38 @@ async def check_openrouter(key: str, client: httpx.AsyncClient, warn_usd: float)
             return result
         if resp.status_code == 200:
             data = resp.json().get("data", {})
-            usage = data.get("usage", 0)        # in USD cents or credits
+            usage = data.get("usage", 0)        # in USD
             limit = data.get("limit")           # null = unlimited
             is_free = data.get("is_free_tier", False)
             rate_limit = data.get("rate_limit", {})
 
-            # OpenRouter usage is in USD (float)
+            # Also check /api/v1/credits for total balance
+            credits_resp = await client.get(
+                "https://openrouter.ai/api/v1/credits",
+                headers={"Authorization": f"Bearer {key}"},
+                timeout=TIMEOUT,
+            )
+            total_credits = None
+            if credits_resp.status_code == 200:
+                credits_data = credits_resp.json().get("data", {})
+                total_credits = credits_data.get("total_credits")
+                credits_usage = credits_data.get("total_usage", 0)
+                if total_credits is not None:
+                    usage = credits_usage  # Use credits endpoint usage if available
+
+            # Calculate balance
+            if total_credits is not None:
+                balance_amount = round(float(total_credits) - float(usage), 4)
+            elif limit is not None:
+                balance_amount = round(float(limit) - float(usage), 4)
+            else:
+                balance_amount = None
+
             result["balance"] = {
-                "amount": round(float(limit or 0) - float(usage or 0), 4) if limit else None,
+                "amount": balance_amount,
                 "currency": "USD",
                 "type": "free_tier" if is_free else "prepaid",
+                "total_credits": total_credits,
                 "total_limit": limit,
                 "used": usage,
             }
